@@ -37,7 +37,7 @@ func (p *G2Elt) UnmarshalFrom(r io.Reader) (int, error) {
 	return n, p.UnmarshalBinary(buf)
 }
 
-func (p *G2Elt) Equal(p2 kyber.Point) bool { x := p2.(*G2Elt).inner; return p.inner.IsEqual(&x) == 1 }
+func (p *G2Elt) Equal(p2 kyber.Point) bool { x := p2.(*G2Elt).inner; return p.inner.IsEqual(&x) }
 
 func (p *G2Elt) Null() kyber.Point { p.inner.SetIdentity(); return p }
 
