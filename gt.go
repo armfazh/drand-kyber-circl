@@ -43,7 +43,7 @@ func (p *GTElt) UnmarshalFrom(r io.Reader) (int, error) {
 	return n, p.UnmarshalBinary(buf)
 }
 
-func (p *GTElt) Equal(p2 kyber.Point) bool { x := p2.(*GTElt).inner; return p.inner.IsEqual(&x) }
+func (p *GTElt) Equal(p2 kyber.Point) bool { x := p2.(*GTElt); return p.inner.IsEqual(&x.inner) }
 
 func (p *GTElt) Null() kyber.Point { p.inner.SetIdentity(); return p }
 
@@ -70,9 +70,8 @@ func (p *GTElt) Data() ([]byte, error) {
 }
 
 func (p *GTElt) Add(a, b kyber.Point) kyber.Point {
-	aa := a.(*GTElt).inner
-	bb := b.(*GTElt).inner
-	p.inner.Mul(&aa, &bb)
+	aa, bb := a.(*GTElt), b.(*GTElt)
+	p.inner.Mul(&aa.inner, &bb.inner)
 	return p
 }
 
@@ -83,14 +82,13 @@ func (p *GTElt) Sub(a, b kyber.Point) kyber.Point {
 }
 
 func (p *GTElt) Neg(a kyber.Point) kyber.Point {
-	aa := a.(*GTElt).inner
-	p.inner.Inv(&aa)
+	aa := a.(*GTElt)
+	p.inner.Inv(&aa.inner)
 	return p
 }
 
 func (p *GTElt) Mul(s kyber.Scalar, q kyber.Point) kyber.Point {
-	ss := s.(*Scalar).inner
-	qq := q.(*GTElt).inner
-	p.inner.Exp(&qq, &ss)
+	qq, ss := q.(*GTElt), s.(*Scalar)
+	p.inner.Exp(&qq.inner, &ss.inner)
 	return p
 }

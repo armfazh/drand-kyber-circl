@@ -2,6 +2,7 @@ package drand_kyber_circl
 
 import (
 	"crypto/cipher"
+	"fmt"
 	"io"
 
 	circl "github.com/cloudflare/circl/ecc/bls12381"
@@ -16,7 +17,7 @@ func (p *G1Elt) MarshalBinary() (data []byte, err error) { return p.inner.BytesC
 
 func (p *G1Elt) UnmarshalBinary(data []byte) error { return p.inner.SetBytes(data) }
 
-func (p *G1Elt) String() string { return p.inner.String() }
+func (p *G1Elt) String() string { return fmt.Sprintf("bls12-381.G1: %x", p.inner.BytesCompressed()) }
 
 func (p *G1Elt) MarshalSize() int { return circl.G1SizeCompressed }
 
@@ -37,7 +38,7 @@ func (p *G1Elt) UnmarshalFrom(r io.Reader) (int, error) {
 	return n, p.UnmarshalBinary(buf)
 }
 
-func (p *G1Elt) Equal(p2 kyber.Point) bool { x := p2.(*G1Elt).inner; return p.inner.IsEqual(&x) }
+func (p *G1Elt) Equal(p2 kyber.Point) bool { x := p2.(*G1Elt); return p.inner.IsEqual(&x.inner) }
 
 func (p *G1Elt) Null() kyber.Point { p.inner.SetIdentity(); return p }
 
@@ -67,9 +68,8 @@ func (p *G1Elt) Data() ([]byte, error) {
 }
 
 func (p *G1Elt) Add(a, b kyber.Point) kyber.Point {
-	aa := a.(*G1Elt).inner
-	bb := b.(*G1Elt).inner
-	p.inner.Add(&aa, &bb)
+	aa, bb := a.(*G1Elt), b.(*G1Elt)
+	p.inner.Add(&aa.inner, &bb.inner)
 	return p
 }
 
@@ -86,10 +86,20 @@ func (p *G1Elt) Neg(a kyber.Point) kyber.Point {
 }
 
 func (p *G1Elt) Mul(s kyber.Scalar, q kyber.Point) kyber.Point {
-	ss := s.(*Scalar).inner
-	qq := q.(*G1Elt).inner
-	p.inner.ScalarMult(&ss, &qq)
+	if q == nil {
+		q = new(G1Elt).Base()
+	}
+	ss, qq := s.(*Scalar), q.(*G1Elt)
+	p.inner.ScalarMult(&ss.inner, &qq.inner)
 	return p
 }
 
 func (p *G1Elt) IsInCorrectGroup() bool { return p.inner.IsOnG1() }
+
+func (p *G1Elt) Hash(m []byte) kyber.Point {
+	// Domain comes from the ciphersuite used by the RFC of this name compatible
+	// with the paired library > v18
+	var Domain = []byte("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_")
+	p.inner.Hash(m, Domain)
+	return p
+}

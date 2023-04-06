@@ -38,13 +38,13 @@ func (s *Scalar) UnmarshalFrom(r io.Reader) (int, error) {
 }
 
 func (s *Scalar) Equal(s2 kyber.Scalar) bool {
-	x := s2.(*Scalar).inner
-	return s.inner.IsEqual(&x) == 1
+	x := s2.(*Scalar)
+	return s.inner.IsEqual(&x.inner) == 1
 }
 
 func (s *Scalar) Set(a kyber.Scalar) kyber.Scalar {
-	aa := a.(*Scalar).inner
-	s.inner.Set(&aa)
+	aa := a.(*Scalar)
+	s.inner.Set(&aa.inner)
 	return s
 }
 
@@ -64,16 +64,14 @@ func (s *Scalar) SetInt64(v int64) kyber.Scalar {
 func (s *Scalar) Zero() kyber.Scalar { s.inner.SetUint64(0); return s }
 
 func (s *Scalar) Add(a, b kyber.Scalar) kyber.Scalar {
-	aa := a.(*Scalar).inner
-	bb := b.(*Scalar).inner
-	s.inner.Add(&aa, &bb)
+	aa, bb := a.(*Scalar), b.(*Scalar)
+	s.inner.Add(&aa.inner, &bb.inner)
 	return s
 }
 
 func (s *Scalar) Sub(a, b kyber.Scalar) kyber.Scalar {
-	aa := a.(*Scalar).inner
-	bb := b.(*Scalar).inner
-	s.inner.Sub(&aa, &bb)
+	aa, bb := a.(*Scalar), b.(*Scalar)
+	s.inner.Sub(&aa.inner, &bb.inner)
 	return s
 }
 
@@ -86,21 +84,16 @@ func (s *Scalar) Neg(a kyber.Scalar) kyber.Scalar {
 func (s *Scalar) One() kyber.Scalar { s.inner.SetUint64(1); return s }
 
 func (s *Scalar) Mul(a, b kyber.Scalar) kyber.Scalar {
-	aa := a.(*Scalar).inner
-	bb := b.(*Scalar).inner
-	s.inner.Mul(&aa, &bb)
+	aa, bb := a.(*Scalar), b.(*Scalar)
+	s.inner.Mul(&aa.inner, &bb.inner)
 	return s
 }
 
-func (s *Scalar) Div(a, b kyber.Scalar) kyber.Scalar {
-	s.Inv(b)
-	s.Mul(s, a)
-	return s
-}
+func (s *Scalar) Div(a, b kyber.Scalar) kyber.Scalar { return s.Mul(new(Scalar).Inv(b), a) }
 
 func (s *Scalar) Inv(a kyber.Scalar) kyber.Scalar {
-	aa := a.(*Scalar).inner
-	s.inner.Inv(&aa)
+	aa := a.(*Scalar)
+	s.inner.Inv(&aa.inner)
 	return s
 }
 

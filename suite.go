@@ -22,16 +22,13 @@ func (s Suite) G1() kyber.Group { return G1 }
 func (s Suite) G2() kyber.Group { return G2 }
 func (s Suite) GT() kyber.Group { return GT }
 func (s Suite) Pair(p1, p2 kyber.Point) kyber.Point {
-	aa := p1.(*G1Elt).inner
-	bb := p2.(*G2Elt).inner
-	return &GTElt{*circl.Pair(&aa, &bb)}
+	aa, bb := p1.(*G1Elt), p2.(*G2Elt)
+	return &GTElt{*circl.Pair(&aa.inner, &bb.inner)}
 }
-func (s Suite) ValidatePairing(p1, p2, inv1, inv2 kyber.Point) bool {
-	aa := p1.(*G1Elt).inner
-	bb := p2.(*G2Elt).inner
-	cc := inv1.(*G1Elt).inner
-	dd := inv2.(*G2Elt).inner
-	out := circl.ProdPairFrac([]*circl.G1{&aa, &cc}, []*circl.G2{&bb, &dd}, []int{1, -1})
+func (s Suite) ValidatePairing(p1, p2, p3, p4 kyber.Point) bool {
+	a, b := p1.(*G1Elt), p2.(*G2Elt)
+	c, d := p3.(*G1Elt), p4.(*G2Elt)
+	out := circl.ProdPairFrac([]*circl.G1{&a.inner, &c.inner}, []*circl.G2{&b.inner, &d.inner}, []int{1, -1})
 	return out.IsIdentity()
 }
 
