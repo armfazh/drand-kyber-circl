@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"hash"
 	"io"
-	"reflect"
 
 	circl "github.com/cloudflare/circl/ecc/bls12381"
 	"github.com/drand/kyber"
@@ -30,10 +29,6 @@ func (s Suite) ValidatePairing(p1, p2, p3, p4 kyber.Point) bool {
 	c, d := p3.(*G1Elt), p4.(*G2Elt)
 	out := circl.ProdPairFrac([]*circl.G1{&a.inner, &c.inner}, []*circl.G2{&b.inner, &d.inner}, []int{1, -1})
 	return out.IsIdentity()
-}
-
-func (s Suite) New(t reflect.Type) interface{} {
-	panic("Suite.Encoding: deprecated in drand")
 }
 
 func (s Suite) Read(r io.Reader, objs ...interface{}) error {
